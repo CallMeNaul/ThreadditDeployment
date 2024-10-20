@@ -18,14 +18,9 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    restart: always
     ports:
       - "5000:5000"
-    environment:
-      - DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - SECRET_KEY=${SECRET_KEY}
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     depends_on:
       - postgres
 
@@ -33,6 +28,7 @@ services:
     build:
       context: .
       dockerfile: frontend/threaddit/Dockerfile
+    restart: always
     ports:
       - "3000:3000"
     environment:
