@@ -1,5 +1,5 @@
 # Use the official Python image as the base image
-FROM python:3.10
+FROM python:3.12-alpine
 
 # Set the working directory to /app
 WORKDIR /app
@@ -21,4 +21,5 @@ ENV FLASK_ENV=production
 EXPOSE 5000
 
 # Start the Flask app
-CMD ["flask", "run", "--host=0.0.0.0"]
+#CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["python", "./run.py"]
