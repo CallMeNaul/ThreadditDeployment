@@ -14,7 +14,7 @@ services:
       - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
       - postgres-data:/var/lib/postgresql/data
   app:
-    image: threaddit:latest
+    image: callmenaul/threaddit-v3
     restart: always
     ports:
       - "8080:5000"
