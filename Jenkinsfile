@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Lấy mã nguồn từ hệ thống quản lý mã nguồn (ví dụ: Git)
-                git branch: 'main',
+                git branch: 'test',
                     url 'https://github.com/CallMeNaul/ThreadditDeployment.git'
             }
         }
