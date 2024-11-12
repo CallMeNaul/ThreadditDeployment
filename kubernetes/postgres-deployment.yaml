@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: threaddit
+  labels:
+    app: postgres
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: threaddit-db
+          image: postgres:13.16
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d/schema.sql
+              name: postgres-cm0
+              subPath: schema.sql
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+              subPath: postgresql-data
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: schema.sql
+                path: schema.sql
+            name: postgres-cm0
+          name: postgres-cm0
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data
