@@ -15,13 +15,14 @@ pipeline {
         }
         stage('Checkout') {
             steps {
-                git $(sourceCode)
+                git "https://github.com/CallMeNaul/ThreadditDeployment.git"
             }
         }
         stage('Scan image') {
             steps {
                 ////sh 'docker-compose -f docker-compose.yml up -d'
-                sh (script:""" trivy image thdyu/threaddit > vulnerabilities.txt; cat vulnerabilities.txt """, label: "Check Vulnerabilities")
+                sh (script:""" trivy image thdyu/threaddit > vulnerabilities.txt; """, label: "Check Vulnerabilities")
+                sh (script:""" cat vulnerabilities.txt """, label: "Check Vulnerabilities")
             }
         }
     }
