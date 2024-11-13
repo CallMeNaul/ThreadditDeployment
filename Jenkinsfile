@@ -20,11 +20,9 @@ pipeline {
         }
         stage('Scan image') {
             steps {
-                script {
-                    ////sh 'docker-compose -f docker-compose.yml up -d'
-                    sh 'trivy image $(image) > $(scanFile)'
-                    sh 'cat $(scanFile)'
-                }
+                ////sh 'docker-compose -f docker-compose.yml up -d'
+                sh (script:"""trivy image $(image) > $(scanFile)""", label: "Scan image")
+                sh (script:"""tcat $(scanFile)""", label: "Check Vulnerabilities")
             }
         }
     }
