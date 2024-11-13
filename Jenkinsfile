@@ -1,5 +1,7 @@
 pipeline {
-    agent any 
+    agent {
+        label 'naul'
+    }
 
     stages {
         stage('Checkout') {
@@ -8,7 +10,18 @@ pipeline {
                 git 'https://github.com/CallMeNaul/ThreadditDeployment.git'
             }
         }
+        stage('Scan image') {
+            steps {
+                script {
+                    //sh 'docker-compose -f docker-compose.yml up -d'
+                    sh 'docker-compose -f docker-compose.yml up -d'
+                    sh 'trivy image thdyu/threaddit > vulnerabilities.txt'
+                    sh 'cat vulnerabilities.txt'
+                }
+            }
+        }
     }
+    
 
     post {
         success {
