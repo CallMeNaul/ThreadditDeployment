@@ -15,7 +15,7 @@ pipeline {
         }
         stage('Checkout') {
             steps {
-                git "https://github.com/CallMeNaul/ThreadditDeployment.git"
+                git sourceCode
             }
         }
         stage('Scan image') {
