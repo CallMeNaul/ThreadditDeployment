@@ -1,15 +1,49 @@
 pipeline {
-    agent any 
-
+    agent {
+        label 'naul'
+    }
+    environment {
+        sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
+        image = "callmenaul/threaddit-v"
+        version = "${env.BUILD_NUMBER}"
+        tag = "latest"
+        imageName = "${image}${version}:${tag}"
+        scanFile = "vulnerabilities.txt"
+    }
     stages {
+        stage('Info') {
+            steps {
+                sh (script:"""whoami;pwd;ls""", label: "Check information")
+            }
+        }
         stage('Checkout') {
             steps {
-                // Lấy mã nguồn từ hệ thống quản lý mã nguồn (ví dụ: Git)
-                git 'https://github.com/CallMeNaul/ThreadditDeployment.git'
+                git sourceCode
+            }
+        }
+        stage('Build Image') {
+            steps {
+                sh (script:""" docker build -t ${imageName} """, label: "Build Image with Dockerfile")
+            }
+        }
+        stage('Push Image to DockerHub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
+                    sh 'docker push ${imageName}'
+                }
+            }
+        }
+        stage('Scan image') {
+            steps {
+                ////sh 'docker-compose -f docker-compose.yml up -d'
+                sh (script:""" trivy image ${image} > ${scanFile}; """, label: "Check Vulnerabilities")
+                sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
             }
         }
     }
-
+    
     post {
         success {
             echo 'Pipeline completed successfully!'

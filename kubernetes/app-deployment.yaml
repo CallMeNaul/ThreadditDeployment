@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: threaddit
+  labels:
+    app: threaddit
+  name: threaddit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: threaddit
+  template:
+    metadata:
+      labels:
+        app: threaddit
+    spec:
+      containers:
+        - name: threaddit-app
+          image: thdyu/threaddit:latest
+          envFrom:
+            - secretRef:
+                name: threaddit-secret
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+      restartPolicy: Always
