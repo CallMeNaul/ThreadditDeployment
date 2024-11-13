@@ -1,14 +1,32 @@
 pipeline {
-    agent any 
-
+    agent {
+        label 'naul'
+    }
+    environment {
+        sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
+        image = "thdyu/threaddit"
+        scanFile = "vulnerabilities.txt"
+    }
     stages {
+        stage('Info') {
+            steps {
+                sh (script:"""whoami;pwd;ls""", label: "Check information")
+            }
+        }
         stage('Checkout') {
             steps {
-                // Lấy mã nguồn từ hệ thống quản lý mã nguồn (ví dụ: Git)
-                git 'https://github.com/CallMeNaul/ThreadditDeployment.git'
+                git sourceCode
+            }
+        }
+        stage('Scan image') {
+            steps {
+                ////sh 'docker-compose -f docker-compose.yml up -d'
+                sh (script:""" trivy image ${image} > ${scanFile}; """, label: "Check Vulnerabilities")
+                sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
             }
         }
     }
+    
 
     post {
         success {
