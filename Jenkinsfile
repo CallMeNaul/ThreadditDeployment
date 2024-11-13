@@ -6,6 +6,7 @@ pipeline {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
         image = "thdyu/threaddit"
         scanFile = "vulnerabilities.txt"
+        scanImageScript = "trivy image $(image) > $(scanFile); cat $(scanFile)"
     }
     stages {
         stage('Info') {
@@ -21,8 +22,7 @@ pipeline {
         stage('Scan image') {
             steps {
                 ////sh 'docker-compose -f docker-compose.yml up -d'
-                sh (script:"""trivy image $(image) > $(scanFile)""", label: "Scan image")
-                sh (script:"""tcat $(scanFile)""", label: "Check Vulnerabilities")
+                sh (script:""" $(scanImageScript) """, label: "Check Vulnerabilities")
             }
         }
     }
