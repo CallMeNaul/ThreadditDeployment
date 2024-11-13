@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: threaddit
+  labels:
+    service: nginx
+  name: nginx-service
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "80"
+      port: 80
+      targetPort: 80
+  selector:
+    service: nginx

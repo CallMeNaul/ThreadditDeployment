@@ -17,17 +17,6 @@ spec:
     spec:
       containers:
         - name: threaddit-app
-#        - env:
-#            - name: CLOUDINARY_API_KEY
-#              value: "$(CLOUDINARY_API_KEY)"
-#            - name: CLOUDINARY_API_SECRET
-#              value: "$(CLOUDINARY_API_SECRET)"
-#            - name: CLOUDINARY_CLOUD_NAME
-#              value: "$(CLOUDINARY_CLOUD_NAME)"
-#            - name: DATABASE_URI
-#              value: "$(DATABASE_URI)"
-#            - name: SECRET_KEY
-#              value: "$(SECRET_KEY)"
           image: thdyu/threaddit:latest
           envFrom:
             - secretRef:
