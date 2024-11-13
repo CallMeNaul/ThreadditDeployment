@@ -26,18 +26,17 @@ pipeline {
                 sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
             }
         }
-        // stage('Push Image to DockerHub') {
-        //     steps {
-        //         script {
-        //             withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-        //                 sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
-        //             sh 'docker push ${imageName}'
-        //         }
-        //     }
-        // }
+        stage('Push Image to DockerHub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
+                    sh 'docker push ${imageName}'
+                }
+            }
+        }
         stage('Scan image') {
             steps {
-                ////sh 'docker-compose -f docker-compose.yml up -d'
                 sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
                 sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
             }
