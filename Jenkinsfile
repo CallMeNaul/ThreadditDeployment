@@ -23,7 +23,7 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh (script:""" docker build -t ${imageName} """, label: "Build Image with Dockerfile")
+                sh (script:""" docker build -t ${imageName} .""", label: "Build Image with Dockerfile")
             }
         }
         stage('Push Image to DockerHub') {
