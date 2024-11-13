@@ -22,7 +22,7 @@ pipeline {
         stage('Scan image') {
             steps {
                 ////sh 'docker-compose -f docker-compose.yml up -d'
-                sh (script:""" ${scanImageScript} """, label: "Check Vulnerabilities")
+                sh (script:""" $(scanImageScript) """, label: "Check Vulnerabilities")
             }
         }
     }
