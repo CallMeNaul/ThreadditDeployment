@@ -4,7 +4,10 @@ pipeline {
     }
     environment {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
-        image = "thdyu/threaddit"
+        image = "callmenaul/threaddit-v"
+        version = "${env.BUILD_NUMBER}"
+        tag = "latest"
+        imageName = "${image}${version}:${tag}"
         scanFile = "vulnerabilities.txt"
     }
     stages {
@@ -16,6 +19,20 @@ pipeline {
         stage('Checkout') {
             steps {
                 git sourceCode
+            }
+        }
+        stage('Build Image') {
+            steps {
+                sh (script:""" docker build -t ${imageName} """, label: "Build Image with Dockerfile")
+            }
+        }
+        stage('Push Image to DockerHub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    sh 'docker push '
+                }
             }
         }
         stage('Scan image') {
