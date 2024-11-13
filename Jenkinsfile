@@ -6,7 +6,7 @@ pipeline {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
         image = "thdyu/threaddit"
         scanFile = "vulnerabilities.txt"
-        scanImageScript = "trivy image ${image} > ${scanFile)} cat ${scanFile}"
+        scanImageScript = "trivy image ${image} > ${scanFile}; cat ${scanFile}"
     }
     stages {
         stage('Info') {
