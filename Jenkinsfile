@@ -21,8 +21,8 @@ pipeline {
         stage('Scan image') {
             steps {
                 ////sh 'docker-compose -f docker-compose.yml up -d'
-                sh (script:""" trivy image ${image} > vulnerabilities.txt; """, label: "Check Vulnerabilities")
-                sh (script:""" cat vulnerabilities.txt """, label: "Check Vulnerabilities")
+                sh (script:""" trivy image ${image} > ${scanFile}; """, label: "Check Vulnerabilities")
+                sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
             }
         }
     }
