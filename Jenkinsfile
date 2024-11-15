@@ -37,7 +37,8 @@ pipeline {
         // }
         stage('Scan image') {
             steps {
-                sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
+                //sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
+                sh (script:""" docker run aquasec/trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
                 sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
             }
         }
