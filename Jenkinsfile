@@ -9,6 +9,11 @@ pipeline {
         tag = "latest"
         imageName = "${image}${version}:${tag}"
         scanFile = "vulnerabilities.txt"
+        scannerHome = "/opt/sonar-scanner"
+        SONAR_PROJECT_KEY = "Threaddit"
+        SONAR_PROJECT_VERSION = "${env.BUILD_NUMBER}"
+        SONARQUBE_URL = "http://sonarqube.local:9000"
+        SONAR_QUBE_TOKEN = "sqp_aea9c9843abe2dbd8211c3ba832335c2ad5ce9d5"
     }
     stages {
         stage('Info') {
@@ -21,9 +26,36 @@ pipeline {
                 git sourceCode
             }
         }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQube Scanner'
+                    withSonarQubeEnv('sq1') {
+                        sh "${scannerHome}/bin/sonar-scanner " +
+                            "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
+                            "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
+                            "-Dsonar.sources=. " +
+                            "-Dsonar.host.url=${SONARQUBE_URL} " +
+                            "-Dsonar.token=${SONAR_QUBE_TOKEN}"
+                    }
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
         stage('Build Image') {
             steps {
                 sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
+            }
+        }
+        stage('Scan image') {
+            steps {
+                //sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
+                sh (script:""" docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --no-progress --exit-code 1 severity HIGH, CRITICAL ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
+                sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
             }
         }
         // stage('Push Image to DockerHub') {
@@ -35,13 +67,7 @@ pipeline {
         //         }
         //     }
         // }
-        stage('Scan image') {
-            steps {
-                //sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
-                sh (script:""" docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
-                sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
-            }
-        }
+        
     }
     
     post {
