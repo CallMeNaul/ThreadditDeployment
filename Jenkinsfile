@@ -53,7 +53,7 @@ pipeline {
         stage('Scan image') {
             steps {
                 //sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
-                sh (script:""" docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --no-progress --exit-code 1 severity HIGH,CRITICAL ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
+                sh (script:""" docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
                 sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
             }
         }
