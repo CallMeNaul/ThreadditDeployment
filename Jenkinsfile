@@ -69,6 +69,14 @@ pipeline {
                 sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
             }
         }
+        stage('Docker Login') {
+            steps {
+                script {
+                    def githubCredentials = credentials('login-ghcr.io')
+                    sh "echo ${githubCredentials.PASSWORD} | docker login ghcr.io -u ${githubCredentials.USR} --password-stdin"
+                }
+            }
+        }
         stage('Scan image') {
             steps {
                 //sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
