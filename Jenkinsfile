@@ -40,7 +40,7 @@ pipeline {
                     if (criticalVuls > 0) {
                         error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
                     } else {
-                        echo "No critical/high vulnerabilities found."
+                        echo "No critical vulnerabilities found."
                     }
                 }
             }
@@ -85,7 +85,6 @@ pipeline {
                 }
             }
         }
-        
     }
         
     post {
@@ -106,6 +105,5 @@ def checkVulnerabilities(reportFilePath) {
         def matcher = (htmlContent =~ /<td class="severity">Critical<\/td>/)
         criticalCount = matcher.count
     }
-
     return criticalCount
 }
