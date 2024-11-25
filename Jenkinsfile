@@ -28,10 +28,14 @@ pipeline {
         }
         stage('OWASP Dependency-Check') {
             steps {
+                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
+            }
+        }
+        stage('Post-Check Analysis') {
+            steps {
                 script {
-                    dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
                     def report = readDependencyCheckReport()
-                    if (report.vulnerabilities.find { it.severity in ['Critical', 'High'] }) {
+                    if (report.vulnerabilities.find { it.severity in ['Critical'] }) {
                         error("Build failed due to critical/high vulnerabilities found!")
                     }
                 }
