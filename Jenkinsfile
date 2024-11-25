@@ -69,14 +69,14 @@ pipeline {
                 sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
             }
         }
-        // stage('Docker Login') {
-        //     steps {
-        //         script {
-        //             withCredentials([usernamePassword(credentialsId: 'login-ghcr.io', usernameVariable: 'USR', passwordVariable: 'PSW')]) {
-        //                 sh 'echo $PSW | docker login ghcr.io -u $USR --password-stdin'}
-        //         }
-        //     }
-        // }
+        stage('Docker Login') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'login-ghcr.io', usernameVariable: 'USR', passwordVariable: 'PSW')]) {
+                        sh 'echo $PSW | docker login ghcr.io -u $USR --password-stdin'}
+                }
+            }
+        }
         stage('Scan image') {
             steps {
                 //sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
