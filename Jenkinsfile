@@ -34,9 +34,13 @@ pipeline {
         stage('Post-Check Analysis') {
             steps {
                 script {
-                    def report = readDependencyCheckReport()
-                    if (report.vulnerabilities.find { it.severity in ['Critical'] }) {
-                        error("Build failed due to critical/high vulnerabilities found!")
+                    def reportFilePath = 'dependency-check-report.html'
+                    def criticalVuls = checkVulnerabilities(reportFilePath)
+
+                    if (criticalVuls > 0) {
+                        error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
+                    } else {
+                        echo "No critical/high vulnerabilities found."
                     }
                 }
             }
@@ -92,4 +96,16 @@ pipeline {
             echo 'Pipeline failed.'
         }
     }
+}
+
+def checkVulnerabilities(reportFilePath) {
+    def criticalCount = 0
+    def htmlContent = readFile(reportFilePath)
+
+    if (htmlContent.contains("Critical")) {
+        def matcher = (htmlContent =~ /<td class="severity">Critical<\/td>/)
+        criticalCount = matcher.count
+    }
+
+    return criticalCount
 }
