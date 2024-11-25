@@ -72,8 +72,8 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-                    def githubCredentials = credentials('login-ghcr.io')
-                    sh "echo ${githubCredentials.PASSWORD} | docker login ghcr.io -u ${githubCredentials.USR} --password-stdin"
+                    withCredentials([usernamePassword(credentialsId: 'login-ghcr.io', usernameVariable: 'USR', passwordVariable: 'PSW')]) {
+                        sh 'echo $PSW | docker login ghcr.io -u $USR --password-stdin'}
                 }
             }
         }
