@@ -31,6 +31,17 @@ pipeline {
                 dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
             }
         }
+        stage('Post-Check Analysis') {
+            steps {
+                script {
+                    def report = readDependencyCheckReport()
+                    
+                    if (report.vulnerabilities.find { it.severity in ['Critical', 'High'] }) {
+                        error("Build failed due to critical/high vulnerabilities found!")
+                    }
+                }
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 script {
