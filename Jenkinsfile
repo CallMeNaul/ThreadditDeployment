@@ -26,60 +26,64 @@ pipeline {
                 git sourceCode
             }
         }
-        // stage('OWASP Dependency-Check') {
-        //     steps {
-        //         dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
-        //     }
-        // }
-        // stage('Post-Check Analysis') {
-        //     steps {
-        //         script {
-        //             def reportFilePath = 'dependency-check-report.html'
-        //             def criticalVuls = checkVulnerabilities(reportFilePath)
+        stage('OWASP Dependency-Check') {
+            steps {
+                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
+            }
+        }
+        stage('Post-Check Analysis') {
+            steps {
+                script {
+                    def reportFilePath = 'dependency-check-report.html'
+                    def criticalVuls = checkVulnerabilities(reportFilePath)
 
-        //             if (criticalVuls > 0) {
-        //                 error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
-        //             } else {
-        //                 echo "No critical vulnerabilities found."
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         script {
-        //             withSonarQubeEnv('sq1') {
-        //                 sh "${scannerHome}/bin/sonar-scanner " +
-        //                     "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
-        //                     "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
-        //                     "-Dsonar.sources=. " +
-        //                     "-Dsonar.host.url=${SONARQUBE_URL} " +
-        //                     "-Dsonar.token=${SONAR_QUBE_TOKEN}"
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Quality Gate') {
-        //     steps {
-        //         waitForQualityGate abortPipeline: true
-        //     }
-        // }
+                    if (criticalVuls > 0) {
+                        error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
+                    } else {
+                        echo "No critical vulnerabilities found."
+                    }
+                }
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv('sq1') {
+                        sh "${scannerHome}/bin/sonar-scanner " +
+                            "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
+                            "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
+                            "-Dsonar.sources=. " +
+                            "-Dsonar.host.url=${SONARQUBE_URL} " +
+                            "-Dsonar.token=${SONAR_QUBE_TOKEN}"
+                    }
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
         stage('Build Image') {
             steps {
                 sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
             }
         }
-        stage('Docker Login') {
+        // stage('Docker Login') {
+        //     steps {
+        //         script {
+        //             withCredentials([usernamePassword(credentialsId: 'login-ghcr.io', usernameVariable: 'USR', passwordVariable: 'PSW')]) {
+        //                 sh 'echo $PSW | docker login ghcr.io -u $USR --password-stdin'}
+        //         }
+        //     }
+        // }
+        stage('Scan image') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'login-ghcr.io', usernameVariable: 'USR', passwordVariable: 'PSW')]) {
                         sh 'echo $PSW | docker login ghcr.io -u $USR --password-stdin'}
                 }
-            }
-        }
-        stage('Scan image') {
-            steps {
-                //sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
+                
                 sh (script:""" docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v trivy-db:/root/.cache/ aquasec/trivy image --cache-dir /root/.cache/ --no-progress --exit-code 1 --severity HIGH,CRITICAL ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
                 sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
             }
