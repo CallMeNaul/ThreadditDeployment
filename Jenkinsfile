@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'naul'
-    }
+    agent any
     environment {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
         image = "callmenaul/threaddit-v"
