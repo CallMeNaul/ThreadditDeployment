@@ -39,9 +39,13 @@ pipeline {
                             "-Dsonar.token=${SONAR_QUBE_TOKEN}"
                     }
                 }
-                waitForQualityGate abortPipeline: true
             }
         }
+        stage('Quality Gate') {
+             steps {
+                 waitForQualityGate abortPipeline: true
+             }
+         }
         stage('Trivy Scan') {
             steps {
                 script {
