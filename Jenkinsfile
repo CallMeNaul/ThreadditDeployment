@@ -28,33 +28,33 @@ pipeline {
                 git sourceCode
             }
         }
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         script {
-        //             withSonarQubeEnv('sq1') {
-        //                 sh "${scannerHome}/bin/sonar-scanner " +
-        //                     "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
-        //                     "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
-        //                     "-Dsonar.sources=. " +
-        //                     "-Dsonar.host.url=${SONARQUBE_URL} " +
-        //                     "-Dsonar.token=${SONAR_QUBE_TOKEN}"
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Quality Gate') {
-        //      steps {
-        //          waitForQualityGate abortPipeline: false
-        //      }
-        //  }
-        stage('Trivy Scan') {
+        stage('SonarQube Analysis') {
             steps {
                 script {
-                    sh (script:""" docker run --rm aquasec/trivy fs --no-progress --exit-code 1 --severity HIGH,CRITICAL /src > ${codeScanFile}""", label: "Check Code Vulnerabilities")
-                    sh (script:""" cat ${codeScanFile} """, label: "Display Code Vulnerabilities")
+                    withSonarQubeEnv('sq1') {
+                        sh "${scannerHome}/bin/sonar-scanner " +
+                            "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
+                            "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
+                            "-Dsonar.sources=. " +
+                            "-Dsonar.host.url=${SONARQUBE_URL} " +
+                            "-Dsonar.token=${SONAR_QUBE_TOKEN}"
+                    }
                 }
             }
         }
+        stage('Quality Gate') {
+             steps {
+                 waitForQualityGate abortPipeline: false
+             }
+         }
+        // stage('Trivy Scan') {
+        //     steps {
+        //         script {
+        //             sh (script:""" docker run --rm aquasec/trivy fs --no-progress --exit-code 1 --severity HIGH,CRITICAL /src > ${codeScanFile}""", label: "Check Code Vulnerabilities")
+        //             sh (script:""" cat ${codeScanFile} """, label: "Display Code Vulnerabilities")
+        //         }
+        //     }
+        // }
         stage('OWASP Dependency-Check') {
             steps {
                 dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
