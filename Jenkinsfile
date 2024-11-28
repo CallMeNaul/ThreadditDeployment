@@ -28,6 +28,21 @@ pipeline {
                 git sourceCode
             }
         }
+        stage('OWASP Dependency-Check') {
+            steps {
+                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
+                script {
+                    def reportFilePath = 'dependency-check-report.html'
+                    def criticalVuls = checkVulnerabilities(reportFilePath)
+
+                    if (criticalVuls > 0) {
+                        error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
+                    } else {
+                        echo "No critical vulnerabilities found."
+                    }
+                }
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -55,21 +70,7 @@ pipeline {
         //         }
         //     }
         // }
-        stage('OWASP Dependency-Check') {
-            steps {
-                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
-                script {
-                    def reportFilePath = 'dependency-check-report.html'
-                    def criticalVuls = checkVulnerabilities(reportFilePath)
-
-                    if (criticalVuls > 0) {
-                        error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
-                    } else {
-                        echo "No critical vulnerabilities found."
-                    }
-                }
-            }
-        }
+        
         stage('Build Image') {
             steps {
                 sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
