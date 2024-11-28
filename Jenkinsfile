@@ -44,13 +44,13 @@ pipeline {
         // }
         // stage('Quality Gate') {
         //      steps {
-        //          waitForQualityGate abortPipeline: true
+        //          waitForQualityGate abortPipeline: false
         //      }
         //  }
         stage('Trivy Scan') {
             steps {
                 script {
-                    sh (script:""" docker run --rm -v trivy-db:/root/.cache/ aquasec/trivy fs --cache-dir /root/.cache/ --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed /src > ${codeScanFile}""", label: "Check Code Vulnerabilities")
+                    sh (script:""" docker run --rm aquasec/trivy fs --no-progress --exit-code 1 --severity HIGH,CRITICAL /src > ${codeScanFile}""", label: "Check Code Vulnerabilities")
                     sh (script:""" cat ${codeScanFile} """, label: "Display Code Vulnerabilities")
                 }
             }
