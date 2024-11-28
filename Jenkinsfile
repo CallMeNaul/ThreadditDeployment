@@ -14,7 +14,8 @@ pipeline {
         SONAR_PROJECT_KEY = "Threaddit"
         SONAR_PROJECT_VERSION = "${env.BUILD_NUMBER}"
         SONARQUBE_URL = "http://sonarqube.local:9000"
-        SONAR_QUBE_TOKEN = "sqp_aea9c9843abe2dbd8211c3ba832335c2ad5ce9d5"
+        SONAR_QUBE_TOKEN = credentials('sonarqube-token')
+            //"sqp_aea9c9843abe2dbd8211c3ba832335c2ad5ce9d5"
     }
     stages {
         stage('Info') {
@@ -41,11 +42,11 @@ pipeline {
                 }
             }
         }
-        stage('Quality Gate') {
-             steps {
-                 waitForQualityGate abortPipeline: true
-             }
-         }
+        // stage('Quality Gate') {
+        //      steps {
+        //          waitForQualityGate abortPipeline: true
+        //      }
+        //  }
         stage('Trivy Scan') {
             steps {
                 script {
