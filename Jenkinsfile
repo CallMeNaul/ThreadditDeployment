@@ -44,7 +44,7 @@ pipeline {
         }
         stage('Quality Gate') {
              steps {
-                 waitForQualityGate abortPipeline: false
+                 waitForQualityGate abortPipeline: false, credentialsId: 'login-sonarqube'
              }
          }
         // stage('Trivy Scan') {
