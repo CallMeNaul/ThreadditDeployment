@@ -8,7 +8,7 @@ pipeline {
         imageName = "${image}${version}:${tag}"
         codeScanFile = "codeVulnerabilities.txt"
         imageScanFile = "imageVulnerabilities.txt"
-        scannerHome = "/opt/sonar-scanner"
+        scannerHome = "/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarScanner"
         SONAR_PROJECT_KEY = "Threaddit"
         SONAR_PROJECT_VERSION = "${env.BUILD_NUMBER}"
         SONARQUBE_URL = "http://sonarqube.local:9000"
