@@ -28,20 +28,20 @@ pipeline {
                 git sourceCode
             }
         }
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('sq1') {
-                        sh "${scannerHome}/bin/sonar-scanner " +
-                            "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
-                            "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
-                            "-Dsonar.sources=. " +
-                            "-Dsonar.host.url=${SONARQUBE_URL} " +
-                            "-Dsonar.token=${SONAR_QUBE_TOKEN}"
-                    }
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         script {
+        //             withSonarQubeEnv('sq1') {
+        //                 sh "${scannerHome}/bin/sonar-scanner " +
+        //                     "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
+        //                     "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
+        //                     "-Dsonar.sources=. " +
+        //                     "-Dsonar.host.url=${SONARQUBE_URL} " +
+        //                     "-Dsonar.token=${SONAR_QUBE_TOKEN}"
+        //             }
+        //         }
+        //     }
+        // }
         // stage('Quality Gate') {
         //      steps {
         //          waitForQualityGate abortPipeline: true
@@ -50,7 +50,7 @@ pipeline {
         stage('Trivy Scan') {
             steps {
                 script {
-                    sh (script:""" trivy fs --ignore-unfixed --severity HIGH,CRITICAL . > ${codeScanFile}""", label: "Check Code Vulnerabilities")
+                    sh (script:""" docker run --rm -v ./ -v trivy-db:/root/.cache/ aquasec/trivy fs --cache-dir /root/.cache/ --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed /src > ${codeScanFile}""", label: "Check Code Vulnerabilities")
                     sh (script:""" cat ${codeScanFile} """, label: "Display Code Vulnerabilities")
                 }
             }
