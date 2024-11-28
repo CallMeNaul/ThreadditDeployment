@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'naul'
+    }
     environment {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
         image = "callmenaul/threaddit-v"
@@ -8,7 +10,7 @@ pipeline {
         imageName = "${image}${version}:${tag}"
         codeScanFile = "codeVulnerabilities.txt"
         imageScanFile = "imageVulnerabilities.txt"
-        scannerHome = "/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarScanner"
+        scannerHome = "/opt/sonar-scanner"
         SONAR_PROJECT_KEY = "Threaddit"
         SONAR_PROJECT_VERSION = "${env.BUILD_NUMBER}"
         SONARQUBE_URL = "http://sonarqube.local:9000"
