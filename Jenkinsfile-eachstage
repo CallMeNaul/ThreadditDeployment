@@ -60,7 +60,7 @@ pipeline {
          stage('Trivy Scan') {
              steps {
                  script {
-                     sh (script:""" docker run --rm aquasec/trivy fs --no-progress --exit-code 1 --severity HIGH,CRITICAL /src > ${codeScanFile}""", label: "Check Code Vulnerabilities")
+                     sh (script:""" docker run --rm aquasec/trivy fs --no-progress --exit-code 1 --severity HIGH,CRITICAL . > ${codeScanFile}""", label: "Check Code Vulnerabilities")
                      sh (script:""" cat ${codeScanFile} """, label: "Display Code Vulnerabilities")
                  }
              }
