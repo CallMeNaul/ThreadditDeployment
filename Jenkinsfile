@@ -26,6 +26,20 @@ pipeline {
                 git sourceCode
             }
         }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv('sq1') {
+                        sh "${scannerHome}/bin/sonar-scanner " +
+                            "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
+                            "-Dsonar.sources=. " +
+                            "-Dsonar.host.url=${SONARQUBE_URL} " +
+                            "-Dsonar.token=${SONAR_QUBE_TOKEN}"
+                    }
+                }
+                waitForQualityGate abortPipeline: false, credentialsId: 'login-sonarqube'
+            }
+        }
         stage('OWASP Dependency-Check') {
             steps {
                 dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
@@ -44,21 +58,6 @@ pipeline {
                 }
             }
         }
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('sq1') {
-                        sh "${scannerHome}/bin/sonar-scanner " +
-                            "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
-                            "-Dsonar.sources=. " +
-                            "-Dsonar.host.url=${SONARQUBE_URL} " +
-                            "-Dsonar.token=${SONAR_QUBE_TOKEN}"
-                    }
-                }
-                waitForQualityGate abortPipeline: false, credentialsId: 'login-sonarqube'
-            }
-        }
-
         stage('Trivy Scan') {
             steps {
                 script {
