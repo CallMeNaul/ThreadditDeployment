@@ -21,6 +21,11 @@ pipeline {
                 sh (script:"""whoami;pwd;ls""", label: "Check information")
             }
         }
+        stage('Cleanup Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Checkout') {
             steps {
                 git sourceCode
@@ -88,6 +93,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
                     sh 'docker push ${imageName}'
+                    sh 'docker rmi ${imageName}'
                 }
             }
         }
