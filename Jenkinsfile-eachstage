@@ -46,7 +46,7 @@ pipeline {
             steps {
                 script {
                     withSonarQubeEnv('sq1') {
-                        sh "${scannerHome}/bin/sonar-scanner -Dhttp.nonProxyHosts=heregoesyourspecifichost" +
+                        sh "${scannerHome}/bin/sonar-scanner " +
                             "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
                             "-Dsonar.sources=. " +
                             "-Dsonar.host.url=${SONARQUBE_URL} " +
