@@ -53,13 +53,14 @@ pipeline {
                             "-Dsonar.token=${SONAR_QUBE_TOKEN}"
                     }
                 }
+                waitForQualityGate abortPipeline: false, credentialsId: 'login-sonarqube'
             }
         }
-        stage('Quality Gate') {
-             steps {
-                 waitForQualityGate abortPipeline: false, credentialsId: 'login-sonarqube'
-             }
-         }
+        //stage('Quality Gate') {
+        //     steps {
+                 
+        //     }
+        // }
         // stage('Trivy Scan') {
         //     steps {
         //         script {
