@@ -12,7 +12,6 @@ pipeline {
         imageScanFile = "imageVulnerabilities.txt"
         scannerHome = "/opt/sonar-scanner"
         SONAR_PROJECT_KEY = "Threaddit"
-        SONAR_PROJECT_VERSION = "${env.BUILD_NUMBER}"
         SONARQUBE_URL = "http://sonarqube.local:9000"
         SONAR_QUBE_TOKEN = credentials('sonarqube-token')
             //"sqp_aea9c9843abe2dbd8211c3ba832335c2ad5ce9d5"
@@ -49,7 +48,6 @@ pipeline {
                     withSonarQubeEnv('sq1') {
                         sh "${scannerHome}/bin/sonar-scanner " +
                             "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
-                            "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
                             "-Dsonar.sources=. " +
                             "-Dsonar.host.url=${SONARQUBE_URL} " +
                             "-Dsonar.token=${SONAR_QUBE_TOKEN}"
