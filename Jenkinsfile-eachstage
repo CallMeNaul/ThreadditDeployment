@@ -14,7 +14,8 @@ pipeline {
         SONAR_PROJECT_KEY = "Threaddit"
         SONAR_PROJECT_VERSION = "${env.BUILD_NUMBER}"
         SONARQUBE_URL = "http://sonarqube.local:9000"
-        SONAR_QUBE_TOKEN = "sqp_aea9c9843abe2dbd8211c3ba832335c2ad5ce9d5"
+        SONAR_QUBE_TOKEN = credentials('sonarqube-token')
+            //"sqp_aea9c9843abe2dbd8211c3ba832335c2ad5ce9d5"
     }
     stages {
         stage('Info') {
@@ -27,6 +28,21 @@ pipeline {
                 git sourceCode
             }
         }
+        //stage('OWASP Dependency-Check') {
+        //    steps {
+        //        dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
+        //        script {
+        //            def reportFilePath = 'dependency-check-report.html'
+        //            def criticalVuls = checkVulnerabilities(reportFilePath)
+
+        //            if (criticalVuls > 0) {
+        //                error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
+        //            } else {
+        //                echo "No critical vulnerabilities found."
+        //            }
+        //        }
+        //    }
+        //}
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -39,48 +55,38 @@ pipeline {
                             "-Dsonar.token=${SONAR_QUBE_TOKEN}"
                     }
                 }
-                waitForQualityGate abortPipeline: true
             }
         }
-        stage('Trivy Scan') {
-            steps {
-                script {
-                    sh (script:""" trivy fs --ignore-unfixed --severity HIGH,CRITICAL . > ${codeScanFile}""", label: "Check Code Vulnerabilities")
-                    sh (script:""" cat ${codeScanFile} """, label: "Display Code Vulnerabilities")
-                }
-            }
-        }
-        stage('OWASP Dependency-Check') {
-            steps {
-                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
-                script {
-                    def reportFilePath = 'dependency-check-report.html'
-                    def criticalVuls = checkVulnerabilities(reportFilePath)
-
-                    if (criticalVuls > 0) {
-                        error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
-                    } else {
-                        echo "No critical vulnerabilities found."
-                    }
-                }
-            }
-        }
-        stage('Build Image') {
-            steps {
-                sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
-            }
-        }
-        stage('Scan image') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'login-ghcr.io', usernameVariable: 'USR', passwordVariable: 'PSW')]) {
-                        sh 'echo $PSW | docker login ghcr.io -u $USR --password-stdin'}
-                }
+        stage('Quality Gate') {
+             steps {
+                 waitForQualityGate abortPipeline: false, credentialsId: 'login-sonarqube'
+             }
+         }
+        // stage('Trivy Scan') {
+        //     steps {
+        //         script {
+        //             sh (script:""" docker run --rm aquasec/trivy fs --no-progress --exit-code 1 --severity HIGH,CRITICAL /src > ${codeScanFile}""", label: "Check Code Vulnerabilities")
+        //             sh (script:""" cat ${codeScanFile} """, label: "Display Code Vulnerabilities")
+        //         }
+        //     }
+        // }
+        
+        //stage('Build Image') {
+        //    steps {
+        //        sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
+        //    }
+        //}
+        //stage('Scan image') {
+        //    steps {
+        //        script {
+        //            withCredentials([usernamePassword(credentialsId: 'login-ghcr.io', usernameVariable: 'USR', passwordVariable: 'PSW')]) {
+        //                sh 'echo $PSW | docker login ghcr.io -u $USR --password-stdin'}
+        //        }
                 
-                sh (script:""" docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v trivy-db:/root/.cache/ aquasec/trivy image --cache-dir /root/.cache/ --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed ${imageName} > ${imageScanFile}; """, label: "Check Image Vulnerabilities")
-                sh (script:""" cat ${imageScanFile} """, label: "Display Image Vulnerabilities")
-            }
-        }
+        //        sh (script:""" docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v trivy-db:/root/.cache/ aquasec/trivy image --cache-dir /root/.cache/ --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed ${imageName} > ${imageScanFile}; """, label: "Check Image Vulnerabilities")
+        //        sh (script:""" cat ${imageScanFile} """, label: "Display Image Vulnerabilities")
+        //    }
+        //}
         //stage('Push Image to DockerHub') {
         //    steps {
         //        script {
@@ -92,7 +98,6 @@ pipeline {
         //}
     }
 
-    
     post {
         success {
             echo 'Pipeline completed successfully!'
