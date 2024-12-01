@@ -6,7 +6,7 @@ pipeline {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
         sourceUrl = "github.com/CallMeNaul/ThreadditDeployment.git"
         image = "callmenaul/threaddit-v"
-        version = "${env.BUILD_NUMBER}"
+        version = "29"//"${env.BUILD_NUMBER}"
         tag = "latest"
         imageName = "${image}${version}:${tag}"
         codeScanFile = "codeVulnerabilities.txt"
@@ -74,11 +74,11 @@ pipeline {
         //          }
         //     }
         // }
-        stage('Build Image') {
-            steps {
-                sh(script: """ docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
-                    }
-        }
+        // stage('Build Image') {
+        //     steps {
+        //         sh(script: """ docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
+        //             }
+        // }
         // stage('Scan image') {
         //     steps {
         //         script {
@@ -90,16 +90,16 @@ pipeline {
         //                 sh(script: """ cat ${imageScanFile} """, label: "Display Image Vulnerabilities")
         //             }
         // }
-        stage('Push Image to DockerHub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
-                    sh 'docker push ${imageName}'
-                    sh 'docker rmi ${imageName}'
-                }
-            }
-        }
+        // stage('Push Image to DockerHub') {
+        //     steps {
+        //         script {
+        //             withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+        //                 sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
+        //             sh 'docker push ${imageName}'
+        //             sh 'docker rmi ${imageName}'
+        //         }
+        //     }
+        // }
 
         stage('Cleanup Workspace Before Deployment') {
             steps {
