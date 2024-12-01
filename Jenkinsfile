@@ -34,6 +34,17 @@ pipeline {
                 git sourceCode
             }
         }
+        stage('Check Branch') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME != deployBranch) {
+                        echo 'Skipping pipeline execution for non-master branch.'
+                        currentBuild.result = 'ABORTED'
+                        return
+                    }
+                }
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 script {
