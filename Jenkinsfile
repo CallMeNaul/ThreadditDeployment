@@ -37,9 +37,9 @@ pipeline {
         stage('Check Branch') {
             steps {
                 script {
-                    def pusher = env.GIT_COMMITTER_NAME ?: ''
-                    echo "Pusher: ${pusher}"
-                    // echo 'Branch: ${env.BRANCH_NAME}'
+                    // def pusher = env.GIT_COMMITTER_NAME ?: ''
+                    // echo "Pusher: ${pusher}"
+                    echo 'Branch: ${env.GIT_BRANCH}'
                     // if (env.BRANCH_NAME != deployBranch) {
                     //     echo 'Skipping pipeline execution for non-master branch.'
                     //     currentBuild.result = 'ABORTED'
