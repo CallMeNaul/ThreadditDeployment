@@ -37,6 +37,7 @@ pipeline {
         stage('Check Branch') {
             steps {
                 script {
+                    echo 'pusher: ${env.GIT_AUTHOR_NAME}'
                     // def pusher = env.GIT_COMMITTER_NAME ?: ''
                     // echo "Pusher: ${pusher}"
                     //echo 'Branch: ${env.GIT_BRANCH}'
