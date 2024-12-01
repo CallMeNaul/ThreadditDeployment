@@ -158,7 +158,6 @@ pipeline {
                     sh 'git commit -m "Update deployment file to use version v${version}"'
                     withCredentials([usernamePassword(credentialsId: 'login-and-push-from-jenkins', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                         sh 'git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${sourceUrl} ${deployBracnh}'}
-                    sh 'git checkout master'
                 }
             }
         }
