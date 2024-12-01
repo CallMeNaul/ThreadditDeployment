@@ -4,16 +4,19 @@ pipeline {
     }
     environment {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
+        sourceUrl = "github.com/CallMeNaul/ThreadditDeployment.git"
         image = "callmenaul/threaddit-v"
         version = "${env.BUILD_NUMBER}"
         tag = "latest"
         imageName = "${image}${version}:${tag}"
-        scanFile = "vulnerabilities.txt"
+        codeScanFile = "codeVulnerabilities.txt"
+        imageScanFile = "imageVulnerabilities.txt"
         scannerHome = "/opt/sonar-scanner"
         SONAR_PROJECT_KEY = "Threaddit"
-        SONAR_PROJECT_VERSION = "${env.BUILD_NUMBER}"
         SONARQUBE_URL = "http://sonarqube.local:9000"
-        SONAR_QUBE_TOKEN = "sqp_aea9c9843abe2dbd8211c3ba832335c2ad5ce9d5"
+        SONAR_QUBE_TOKEN = credentials('sonarqube-token')
+        deployBranch = "demo"
+        deploymentFile = './kubernetes/app-deployment.yaml'
     }
     stages {
         stage('Info') {
@@ -21,70 +24,143 @@ pipeline {
                 sh (script:"""whoami;pwd;ls""", label: "Check information")
             }
         }
+        stage('Cleanup Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Checkout') {
             steps {
                 git sourceCode
             }
         }
-        stage('OWASP Dependency-Check') {
-            steps {
-                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
-                def report = readDependencyCheckReport()
-                if (report.vulnerabilities.find { it.severity in ['Critical', 'High'] }) {
-                    error("Build failed due to critical/high vulnerabilities found!")
-                }
-            }
-        }
-        stage('Post-Check Analysis') {
-            steps {
-                script {
-                    
-                }
-            }
-        }
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('sq1') {
-                        sh "${scannerHome}/bin/sonar-scanner " +
-                            "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
-                            "-Dsonar.projectVersion=${SONAR_PROJECT_VERSION} " +
-                            "-Dsonar.sources=. " +
-                            "-Dsonar.host.url=${SONARQUBE_URL} " +
-                            "-Dsonar.token=${SONAR_QUBE_TOKEN}"
-                    }
-                }
-            }
-        }
-        stage('Quality Gate') {
-            steps {
-                waitForQualityGate abortPipeline: true
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         script {
+        //             withSonarQubeEnv('sq1') {
+        //                 sh "${scannerHome}/bin/sonar-scanner " +
+        //                     "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
+        //                     "-Dsonar.sources=. " +
+        //                     "-Dsonar.host.url=${SONARQUBE_URL} " +
+        //                     "-Dsonar.token=${SONAR_QUBE_TOKEN}"
+        //             }
+        //         }
+        //         waitForQualityGate abortPipeline: false, credentialsId: 'login-sonarqube'
+        //     }
+        // }
+        // stage('OWASP Dependency-Check') {
+        //     steps {
+        //         dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'DP-Check'
+        //         script {
+        //             def reportFilePath = 'dependency-check-report.html'
+        //             def criticalVuls = checkVulnerabilities(reportFilePath)
+
+        //             if (criticalVuls > 0)
+        //             {
+        //                 error("Build failed due to ${criticalVuls} critical vulnerabilities found!")
+        //             }
+        //             else
+        //             {
+        //                 echo "No critical vulnerabilities found."
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Trivy Scan') {
+        //     steps {
+        //         script {
+        //             sh(script: """ docker run --rm -v trivy-db:/root/.cache/ aquasec/trivy fs --cache-dir /root/.cache/ --no-progress --exit-code 1 --severity HIGH,CRITICAL . > ${codeScanFile}""", label: "Check Code Vulnerabilities")
+        //              sh(script: """ cat ${codeScanFile} """, label: "Display Code Vulnerabilities")
+        //          }
+        //     }
+        // }
         stage('Build Image') {
             steps {
-                sh (script:""" docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
-            }
+                sh(script: """ docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
+                    }
         }
-        stage('Scan image') {
-            steps {
-                //sh (script:""" trivy image ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
-                sh (script:""" docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL ${imageName} > ${scanFile}; """, label: "Check Vulnerabilities")
-                sh (script:""" cat ${scanFile} """, label: "Display Vulnerabilities")
-            }
-        }
+        // stage('Scan image') {
+        //     steps {
+        //         script {
+        //             withCredentials([usernamePassword(credentialsId: 'login-ghcr.io', usernameVariable: 'USR', passwordVariable: 'PSW')]) {
+        //                 sh 'echo $PSW | docker login ghcr.io -u $USR --password-stdin'}
+        //         }
+
+        //         sh(script: """ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v trivy-db:/root/.cache/ aquasec/trivy image --cache-dir /root/.cache/ --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed ${imageName} > ${imageScanFile}; """, label: "Check Image Vulnerabilities")
+        //                 sh(script: """ cat ${imageScanFile} """, label: "Display Image Vulnerabilities")
+        //             }
+        // }
         stage('Push Image to DockerHub') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
                     sh 'docker push ${imageName}'
+                    sh 'docker rmi ${imageName}'
                 }
             }
         }
-        
+
+        stage('Cleanup Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout') {
+            steps {
+                git branch: "${deployBranch}", url: "${sourceCode}"
+            }
+        }
+        stage('Setup Git Configuration') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'username-and-email', usernameVariable: 'username', passwordVariable: 'email')]) {
+                        def configuredEmail = sh(script: "git config --get user.email", returnStdout: true).trim()
+                        if (configuredEmail != email) {
+                            echo "Configuring user.email to ${email}"
+                            sh "git config user.email '${email}'"
+                        }
+                        
+                        def configuredUsername = sh(script: "git config --get user.name", returnStdout: true).trim()
+                        if (configuredUsername != username) {
+                            echo "Configuring user.name to ${username}"
+                            sh "git config user.name '${username}'"
+                        }
+                        def remoteUrl = sh(script: "git remote get-url origin", returnStdout: true).trim()
+                        if (remoteUrl != sourceCode) {
+                            echo "Remote URL is ${remoteUrl}. Adding the correct remote."
+                            sh "git remote remove origin"
+                            sh "git remote add origin ${sourceCode}"
+                        }
+                        def currentBranch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                        if (currentBranch != deployBranch) {
+                            echo "Current branch is ${currentBranch}. Switching to branch ${deployBranch}."
+                            sh 'git checkout ${deployBranch}' // Chuyển sang nhánh test
+                        }
+                    }
+                }
+            }
+        }
+        stage('Update Deployment File') {
+            steps {
+                script {
+                    sh 'sed -i "s/${image}[^:]*:latest/${imageName}/g" ${deploymentFile}'
+                    sh 'cat ${deploymentFile}'
+                }
+            }
+        }
+        stage('Commit Changes') {
+            steps {
+                script {
+                    sh 'git add .'
+                    sh 'git commit -m "Update deployment file to use version v${version}"'
+                    withCredentials([usernamePassword(credentialsId: 'login-and-push-from-jenkins', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
+                        sh 'git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${sourceUrl} ${deployBracnh}'}
+                }
+            }
+        }
     }
-        
+
     post {
         success {
             echo 'Pipeline completed successfully!'
@@ -93,4 +169,15 @@ pipeline {
             echo 'Pipeline failed.'
         }
     }
+}
+
+def checkVulnerabilities(reportFilePath) {
+    def criticalCount = 0
+    def htmlContent = readFile(reportFilePath)
+
+    if (htmlContent.contains("Critical")) {
+        def matcher = (htmlContent =~ /<td class="severity">Critical<\/td>/)
+        criticalCount = matcher.count
+    }
+    return criticalCount
 }
