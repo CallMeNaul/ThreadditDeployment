@@ -106,14 +106,10 @@ pipeline {
                 cleanWs()
             }
         }
-        stage('Add origin') {
-            steps {
-                sh "git remote add origin ${sourceCode}"
-            }
-        }
         stage('Checkout Before Deployment') {
             steps {
-                git branch: "master", url: "${sourceCode}"
+                git sourceCode
+                //git branch: "master", url: "${sourceCode}"
             }
         }
         stage('Setup Git Configuration') {
