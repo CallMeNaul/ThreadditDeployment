@@ -39,13 +39,14 @@ pipeline {
                 script {
                     // def pusher = env.GIT_COMMITTER_NAME ?: ''
                     // echo "Pusher: ${pusher}"
-                    echo 'Branch: ${env.GIT_BRANCH}'
+                    //echo 'Branch: ${env.GIT_BRANCH}'
                     // if (env.BRANCH_NAME != deployBranch) {
                     //     echo 'Skipping pipeline execution for non-master branch.'
                     //     currentBuild.result = 'ABORTED'
                     //     return
                     // }
-                    //sh 'git branch'
+                    sh 'git branch'
+                    sh 'git checkout duy-branch'
                 }
             }
         }
