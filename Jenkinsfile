@@ -37,9 +37,9 @@ pipeline {
         stage('Check Branch') {
             steps {
                 script {
-                    echo '${version}'
+                    echo '${env.version}'
                     version = (env.version.toInteger() + 1).toString()
-                    echo '${version}'
+                    echo '${env.version}'
                     //sh 'git rev-parse --abbrev-ref HEAD'
                     //echo 'pusher: ${env.GIT_AUTHOR_NAME}'
                     // def pusher = env.GIT_COMMITTER_NAME ?: ''
