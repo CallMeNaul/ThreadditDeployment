@@ -109,6 +109,7 @@ pipeline {
         stage('Checkout Before Deployment') {
             steps {
                 sh 'git clone --branch demo https://github.com/CallMeNaul/ThreadditDeployment.git'
+                sh 'ls'
                 //git sourceCode
                 //git branch: "master", url: "${sourceCode}"
             }
