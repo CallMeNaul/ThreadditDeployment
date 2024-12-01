@@ -34,27 +34,6 @@ pipeline {
                 git sourceCode
             }
         }
-        stage('Check Branch') {
-            steps {
-                script {
-                    echo '${version}'
-                    // version = (env.version.toInteger() + 1).toString()
-                    // echo '${env.version}'
-                    //sh 'git rev-parse --abbrev-ref HEAD'
-                    //echo 'pusher: ${env.GIT_AUTHOR_NAME}'
-                    // def pusher = env.GIT_COMMITTER_NAME ?: ''
-                    // echo "Pusher: ${pusher}"
-                    //echo 'Branch: ${env.GIT_BRANCH}'
-                    // if (env.BRANCH_NAME != deployBranch) {
-                    //     echo 'Skipping pipeline execution for non-master branch.'
-                    //     currentBuild.result = 'ABORTED'
-                    //     return
-                    // }
-                    // sh 'git branch'
-                    // sh 'git checkout duy-branch'
-                }
-            }
-        }
         // stage('SonarQube Analysis') {
         //     steps {
         //         script {
@@ -95,11 +74,11 @@ pipeline {
         //          }
         //     }
         // }
-        // stage('Build Image') {
-        //     steps {
-        //         sh(script: """ docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
-        //             }
-        // }
+        stage('Build Image') {
+            steps {
+                sh(script: """ docker build -t ${imageName} . """, label: "Build Image with Dockerfile")
+                    }
+        }
         // stage('Scan image') {
         //     steps {
         //         script {
@@ -111,78 +90,78 @@ pipeline {
         //                 sh(script: """ cat ${imageScanFile} """, label: "Display Image Vulnerabilities")
         //             }
         // }
-        // stage('Push Image to DockerHub') {
-        //     steps {
-        //         script {
-        //             withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-        //                 sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
-        //             sh 'docker push ${imageName}'
-        //             sh 'docker rmi ${imageName}'
-        //             version = (env.version.toInteger() + 1).toString()
-        //         }
-        //     }
-        // }
+        stage('Push Image to DockerHub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'jenkinspipelineaccesstoken', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
+                    sh 'docker push ${imageName}'
+                    sh 'docker rmi ${imageName}'
+                    version = (env.version.toInteger() + 1).toString()
+                }
+            }
+        }
 
-        // stage('Cleanup Workspace Before Deployment') {
-        //     steps {
-        //         cleanWs()
-        //     }
-        // }
-        // stage('Checkout Before Deployment') {
-        //     steps {
-        //         git branch: "${deployBranch}", url: "${sourceCode}"
-        //     }
-        // }
-        // stage('Setup Git Configuration') {
-        //     steps {
-        //         script {
-        //             withCredentials([usernamePassword(credentialsId: 'username-and-email-push-to-github-from-jenkins', usernameVariable: 'username', passwordVariable: 'email')]) {
-        //                 def configuredEmail = sh(script: "git config --get user.email", returnStdout: true).trim()
-        //                 if (configuredEmail != email) {
-        //                     echo "Configuring user.email to ${email}"
-        //                     sh "git config user.email '${email}'"
-        //                 }
+        stage('Cleanup Workspace Before Deployment') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout Before Deployment') {
+            steps {
+                git branch: "${deployBranch}", url: "${sourceCode}"
+            }
+        }
+        stage('Setup Git Configuration') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'username-and-email-push-to-github-from-jenkins', usernameVariable: 'username', passwordVariable: 'email')]) {
+                        def configuredEmail = sh(script: "git config --get user.email", returnStdout: true).trim()
+                        if (configuredEmail != email) {
+                            echo "Configuring user.email to ${email}"
+                            sh "git config user.email '${email}'"
+                        }
                         
-        //                 def configuredUsername = sh(script: "git config --get user.name", returnStdout: true).trim()
-        //                 if (configuredUsername != username) {
-        //                     echo "Configuring user.name to ${username}"
-        //                     sh "git config user.name '${username}'"
-        //                 }
-        //                 def remoteUrl = sh(script: "git remote get-url origin", returnStdout: true).trim()
-        //                 if (remoteUrl != sourceCode) {
-        //                     echo "Remote URL is ${remoteUrl}. Adding the correct remote."
-        //                     sh "git remote remove origin"
-        //                     sh "git remote add origin ${sourceCode}"
-        //                 }
-        //                 def currentBranch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-        //                 if (currentBranch != deployBranch) {
-        //                     echo "Current branch is ${currentBranch}. Switching to branch ${deployBranch}."
-        //                     sh 'git checkout ${deployBranch}' // Chuyển sang nhánh test
-        //                 }
-        //             }
+                        def configuredUsername = sh(script: "git config --get user.name", returnStdout: true).trim()
+                        if (configuredUsername != username) {
+                            echo "Configuring user.name to ${username}"
+                            sh "git config user.name '${username}'"
+                        }
+                        def remoteUrl = sh(script: "git remote get-url origin", returnStdout: true).trim()
+                        if (remoteUrl != sourceCode) {
+                            echo "Remote URL is ${remoteUrl}. Adding the correct remote."
+                            sh "git remote remove origin"
+                            sh "git remote add origin ${sourceCode}"
+                        }
+                        def currentBranch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                        if (currentBranch != deployBranch) {
+                            echo "Current branch is ${currentBranch}. Switching to branch ${deployBranch}."
+                            sh 'git checkout ${deployBranch}' // Chuyển sang nhánh test
+                        }
+                    }
                     
-        //         }
-        //     }
-        // }
-        // stage('Update Deployment File') {
-        //     steps {
-        //         script {
-        //             sh 'sed -i "s/callmenaul\\/threaddit-v[^:]*:latest/callmenaul\\/threaddit-v${version}:latest/g" ${deploymentFile}'
-        //             sh 'cat ${deploymentFile}'
-        //         }
-        //     }
-        // }
-        // stage('Commit Changes') {
-        //     steps {
-        //         script {
-        //             sh 'git add ./kubernetes/app-deployment.yaml'
-        //             sh 'git status'
-        //             sh 'git commit -m "Update deployment file to use version v${version}"'
-        //             withCredentials([usernamePassword(credentialsId: 'login-and-push-from-jenkins', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
-        //                 sh 'git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${sourceUrl} ${deployBracnh}'}
-        //         }
-        //     }
-        // }
+                }
+            }
+        }
+        stage('Update Deployment File') {
+            steps {
+                script {
+                    sh 'sed -i "s/callmenaul\\/threaddit-v[^:]*:latest/callmenaul\\/threaddit-v${version}:latest/g" ${deploymentFile}'
+                    sh 'cat ${deploymentFile}'
+                }
+            }
+        }
+        stage('Commit Changes') {
+            steps {
+                script {
+                    sh 'git add ./kubernetes/app-deployment.yaml'
+                    sh 'git status'
+                    sh 'git commit -m "Update deployment file to use version v${version}"'
+                    withCredentials([usernamePassword(credentialsId: 'login-and-push-from-jenkins', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
+                        sh 'git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${sourceUrl} ${deployBracnh}'}
+                }
+            }
+        }
     }
 
     post {
