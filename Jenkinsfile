@@ -24,12 +24,12 @@ pipeline {
                 sh (script:"""whoami;pwd;ls""", label: "Check information")
             }
         }
-        stage('Cleanup Workspace') {
+        stage('Cleanup Workspace Before Build') {
             steps {
                 cleanWs()
             }
         }
-        stage('Checkout') {
+        stage('Checkout Before Build') {
             steps {
                 git sourceCode
             }
@@ -101,12 +101,12 @@ pipeline {
             }
         }
 
-        stage('Cleanup Workspace') {
+        stage('Cleanup Workspace Before Deployment') {
             steps {
                 cleanWs()
             }
         }
-        stage('Checkout') {
+        stage('Checkout Before Deployment') {
             steps {
                 git branch: "${deployBranch}", url: "${sourceCode}"
             }
