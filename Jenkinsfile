@@ -110,6 +110,7 @@ pipeline {
             steps {
                 sh 'git clone --branch demo https://github.com/CallMeNaul/ThreadditDeployment.git'
                 sh 'cd $(ls)'
+                sh 'ls'
                 //git sourceCode
                 //git branch: "master", url: "${sourceCode}"
             }
