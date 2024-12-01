@@ -6,7 +6,7 @@ pipeline {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
         sourceUrl = "github.com/CallMeNaul/ThreadditDeployment.git"
         image = "callmenaul/threaddit-v"
-        version = "61"
+        version = "${env.BUILD_NUMBER}"
         tag = "latest"
         imageName = "${image}${version}:${tag}"
         codeScanFile = "codeVulnerabilities.txt"
@@ -37,9 +37,9 @@ pipeline {
         stage('Check Branch') {
             steps {
                 script {
-                    echo '${env.version}'
-                    version = (env.version.toInteger() + 1).toString()
-                    echo '${env.version}'
+                    echo '${version}'
+                    // version = (env.version.toInteger() + 1).toString()
+                    // echo '${env.version}'
                     //sh 'git rev-parse --abbrev-ref HEAD'
                     //echo 'pusher: ${env.GIT_AUTHOR_NAME}'
                     // def pusher = env.GIT_COMMITTER_NAME ?: ''
