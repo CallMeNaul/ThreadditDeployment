@@ -101,20 +101,20 @@ pipeline {
         //     }
         // }
 
-        stage('Cleanup Workspace Before Deployment') {
-            steps {
-                cleanWs()
-            }
-        }
-        stage('Checkout Before Deployment') {
-            steps {
-                sh 'git clone --branch demo https://github.com/CallMeNaul/ThreadditDeployment.git'
-                sh 'cd $(ls)'
-                sh 'ls'
-                //git sourceCode
-                //git branch: "master", url: "${sourceCode}"
-            }
-        }
+        // stage('Cleanup Workspace Before Deployment') {
+        //     steps {
+        //         cleanWs()
+        //     }
+        // }
+        // stage('Checkout Before Deployment') {
+        //     steps {
+        //         sh 'git clone --branch demo https://github.com/CallMeNaul/ThreadditDeployment.git'
+        //         sh 'cd $(ls)'
+        //         sh 'ls'
+        //         //git sourceCode
+        //         //git branch: "master", url: "${sourceCode}"
+        //     }
+        // }
         stage('Setup Git Configuration') {
             steps {
                 script {
