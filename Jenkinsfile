@@ -149,7 +149,7 @@ pipeline {
         stage('Update Deployment File') {
             steps {
                 script {
-                    sh 'sed -i "s/${image}[^:]*:latest/${imageName}/g" ${deploymentFile}'
+                    sh 'sed -i "s/callmenaul\\/threaddit-v[^:]*:latest/${imageName}/g" ${deploymentFile}'
                     sh 'cat ${deploymentFile}'
                 }
             }
