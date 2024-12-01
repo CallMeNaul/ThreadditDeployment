@@ -6,7 +6,7 @@ pipeline {
         sourceCode = "https://github.com/CallMeNaul/ThreadditDeployment.git"
         sourceUrl = "github.com/CallMeNaul/ThreadditDeployment.git"
         image = "callmenaul/threaddit-v"
-        version = "${env.BUILD_NUMBER}"
+        version = "61"
         tag = "latest"
         imageName = "${image}${version}:${tag}"
         codeScanFile = "codeVulnerabilities.txt"
@@ -37,7 +37,10 @@ pipeline {
         stage('Check Branch') {
             steps {
                 script {
-                    sh 'git rev-parse --abbrev-ref HEAD'
+                    echo '${version}'
+                    version = (env.version.toInteger() + 1).toString()
+                    echo '${version}'
+                    //sh 'git rev-parse --abbrev-ref HEAD'
                     //echo 'pusher: ${env.GIT_AUTHOR_NAME}'
                     // def pusher = env.GIT_COMMITTER_NAME ?: ''
                     // echo "Pusher: ${pusher}"
@@ -115,6 +118,7 @@ pipeline {
         //                 sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'}
         //             sh 'docker push ${imageName}'
         //             sh 'docker rmi ${imageName}'
+        //             version = (env.version.toInteger() + 1).toString()
         //         }
         //     }
         // }
