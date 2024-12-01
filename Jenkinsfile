@@ -118,7 +118,7 @@ pipeline {
         stage('Setup Git Configuration') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'username-and-email', usernameVariable: 'username', passwordVariable: 'email')]) { }
+                    withCredentials([usernamePassword(credentialsId: 'username-and-email-push-to-github-from-jenkins', usernameVariable: 'username', passwordVariable: 'email')]) { }
                     def configuredEmail = sh(script: "git config --get user.email", returnStdout: true).trim()
                     if (configuredEmail != email) {
                             echo "Configuring user.email to ${email}"
