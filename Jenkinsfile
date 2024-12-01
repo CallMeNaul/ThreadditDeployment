@@ -108,7 +108,7 @@ pipeline {
         }
         stage('Checkout Before Deployment') {
             steps {
-                git branch: "${deployBranch}", url: "${sourceCode}"
+                git branch: "master", url: "${sourceCode}"
             }
         }
         stage('Setup Git Configuration') {
@@ -152,7 +152,8 @@ pipeline {
         stage('Commit Changes') {
             steps {
                 script {
-                    sh 'git add .'
+                    sh 'git add ./kubernetes/app-deployment.yaml'
+                    sh 'git status'
                     sh 'git commit -m "Update deployment file to use version v${version}"'
                     withCredentials([usernamePassword(credentialsId: 'login-and-push-from-jenkins', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                         sh 'git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${sourceUrl} ${deployBracnh}'}
