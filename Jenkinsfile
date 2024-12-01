@@ -118,30 +118,29 @@ pipeline {
         stage('Setup Git Configuration') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'username-and-email', usernameVariable: 'username', passwordVariable: 'email')]) {
-                        def configuredEmail = sh(script: "git config --get user.email", returnStdout: true).trim()
-                        if (configuredEmail != email) {
+                    withCredentials([usernamePassword(credentialsId: 'username-and-email', usernameVariable: 'username', passwordVariable: 'email')]) { }
+                    def configuredEmail = sh(script: "git config --get user.email", returnStdout: true).trim()
+                    if (configuredEmail != email) {
                             echo "Configuring user.email to ${email}"
                             sh "git config user.email '${email}'"
                         }
                         
-                        def configuredUsername = sh(script: "git config --get user.name", returnStdout: true).trim()
-                        if (configuredUsername != username) {
+                    def configuredUsername = sh(script: "git config --get user.name", returnStdout: true).trim()
+                    if (configuredUsername != username) {
                             echo "Configuring user.name to ${username}"
                             sh "git config user.name '${username}'"
                         }
-                        def remoteUrl = sh(script: "git remote get-url origin", returnStdout: true).trim()
-                        if (remoteUrl != sourceCode) {
+                    def remoteUrl = sh(script: "git remote get-url origin", returnStdout: true).trim()
+                    if (remoteUrl != sourceCode) {
                             echo "Remote URL is ${remoteUrl}. Adding the correct remote."
                             sh "git remote remove origin"
                             sh "git remote add origin ${sourceCode}"
                         }
-                        def currentBranch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-                        if (currentBranch != deployBranch) {
+                    def currentBranch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                    if (currentBranch != deployBranch) {
                             echo "Current branch is ${currentBranch}. Switching to branch ${deployBranch}."
                             sh 'git checkout ${deployBranch}' // Chuyển sang nhánh test
                         }
-                    }
                 }
             }
         }
