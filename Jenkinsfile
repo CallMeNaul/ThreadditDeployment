@@ -136,7 +136,7 @@ pipeline {
                         def currentBranch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
                         if (currentBranch != deployBranch) {
                             echo "Current branch is ${currentBranch}. Switching to branch ${deployBranch}."
-                            sh 'git checkout ${deployBranch}' // Chuyển sang nhánh test
+                            sh 'git checkout ${deployBranch}'
                         }
                     }
                     
@@ -159,6 +159,9 @@ pipeline {
                     sh 'git commit -m "Update deployment file to use version v${version}"'
                     withCredentials([usernamePassword(credentialsId: 'login-and-push-from-jenkins', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                         sh 'git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${sourceUrl} ${deployBracnh}'}
+                    sh 'git config user.email luanyou952003@gmail.com'
+                    sh 'git config user.name CallMeNaul'
+                    sh 'git checkout master'
                 }
             }
         }
