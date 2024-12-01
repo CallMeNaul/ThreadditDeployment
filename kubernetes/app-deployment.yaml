@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: threaddit-app
-          image: callmenaul/threaddit-v80:latest
+          image: callmenaul/threaddit-v81:latest
           envFrom:
             - secretRef:
                 name: threaddit-secret
